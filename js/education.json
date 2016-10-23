@@ -1,0 +1,22 @@
+var education = {
+	"schools": [
+		{
+			"name": "IIEST, Shibpur",
+			"degree": "Btech"
+		},
+		{
+			"name":"Shree Jain Vidyalaya",
+			"Degree":"Higher Secondary"
+		}
+	],
+	"online courses": [
+		{
+			"title": "JS",
+			"School": "Udacity"
+		},
+		{
+			"name":"Intro to JS",
+			"instructor": "jeff"
+		}
+	]
+}
