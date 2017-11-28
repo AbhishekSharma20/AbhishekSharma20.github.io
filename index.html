@@ -1,10 +1,26 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <Title>Abhishek Sharma</Title>
-  </head>
-  <body>
-    <iframe src="http://docs.google.com/gview?url=https://drive.google.com/open?id=0B01XQndEHcNwYTFFTUdtQ1ZGb00" 
-style="width:600px; height:500px;" frameborder="0"></iframe>
-    
-  </body>
+<head>
+	<title></title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js"></script>
+</head>
+<body>
+	<div>
+			<h3> Rails Documentation</h3>
+	</div>
+	<div id="content"></div>
+  <script>
+  	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+  		if (this.readyState == 4 && this.status == 200) {
+    		document.getElementById("content").innerHTML =
+    		marked(this.responseText);
+  		}
+	};
+	xhttp.open("GET", "https://raw.githubusercontent.com/AbhishekSharma20/AbhishekSharma20.github.io/master/Routes-%20RoR.txt", true);
+	xhttp.send();
+    //document.getElementById('content').innerHTML =
+    //  marked('# Marked in browser\n\nRendered by **marked**.');
+  </script>
+</body>
 </html>
