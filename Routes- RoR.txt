@@ -1,0 +1,281 @@
+Routes- RoR
+------------
+
+ -- Simple route(Match route)
+ -- Default route
+ -- Root route
+ --Resourceful route
+
+ 1. Simple route:  Define plain routes. some what static and hardcoded values
+
+    get "demo/index" is equivalent to
+      match "demo/index", :to=>"demo#index", :via => :get 
+       i.e: match (routeString,Hash specifiying controlor#Action, GET/POST)
+
+ 2. Default route: define a routing rule
+
+      get ':controller(/:action(/:id))'
+      or match ':controller(/:action(/:id))', :via =>:get
+
+  3. Root route: If nothing matches, where to go
+
+      root 'controller#index'
+
+Rendering Templates:
+--------------------
+
+  -- Sensible defaults: Renders view even if it doesnt find action in specified controller
+    No need to pass the template. Automatically finds from the folder identified by controller name.
+
+  Different ways to render template with different name to that of controller:
+
+      - render( :template=>'demo/hello' )
+      - render('demo/hello')
+      - render('hello')
+
+Redirect Actions:
+-----------------
+  Important:  Goes back to browser. status 302, and then browser makes a new request 
+    - redirect_to(:controller => 'demo', :action => 'hello')
+
+View Templates:
+---------------
+  Embedding ruby code in erb template.
+  <% code %>    #Does'nt output anything, just execute in ruby code. even puts wo'nt work
+  <%= code %>   #executes the code and outputs what needs to be output.  puts will output to stdout & not the template. Only return values will be displayed to template.
+
+
+Accessing Data from controller to view:
+---------------------------------------
+  Declare instnace variables in controller. Access directly in view.
+
+HTML links: <%= link_to(text,target) %>
+            target can be ruby hash {:controller => 'dsd', :action => 'asd'}or string('/dsd/asd')
+
+URL Parameters: /Home/Index?id=1&name=xyz
+  access Parameters: 
+  link_to(:controller => 'sdfsf', :param1 =>2, ...)   #create links with parameters
+
+  Vanitha: 35340
+
+
+Databases basics:
+------------------
+  Indexes are data-structures that are built on the specific columns of a table for fast lookup. Indexes should be built on foreign keys to retreive queries faster.
+
+  MySql basic DB commands:
+  -------------------------
+
+    Connect to DB: mysql -u <user_name> -p
+    SHOW DATABASES;
+    CREATE DATABASE db_name
+    USE db_name
+    DROP DATABASE db_name
+
+    GRANT ALL PREVILAGES ON db_name. *
+    TO username@localhost
+    IDENTIFIED BY password
+    SHOW GRANTS FOR username@localhost
+
+Configure project for DB:
+-------------------------
+  config/database.yml
+  rails db:schema:dump
+
+  Rails come with fully configured sqlite3 database.
+  run rake db:create  to create db
+  run rails dbconsole to open sqlite 3 DB console.
+
+
+
+Migrations:
+-----------
+  Set of Database instructions written in ruby, that migrates DB from one state to another.
+  contains instructions for both
+    -Moving up to a new state
+    -Moving down to previous state
+
+  Uses:
+  -Keeps schema with application code
+  -Executable and repetable
+  -Allows sharing schema changes.
+  -Helps with versioning
+  -Allows writting ruby code instead of sql
+
+  create migration command:
+    $ rails create migration Name(In camel case).
+
+Generate Models & Migrations
+----------------------------
+rails generate model <singularName>
+
+Charecteristics of rails Model:
+-------------------------------
+  - Define table in up Migrations
+  - t.timestamps is automtically creates added and modified columns
+  - Id comes at default, no need to add column
+
+Migration methods:
+------------------
+
+   -Table Migrations
+  create table(table, options) do |t|
+    ... define columns ....
+  end
+  
+  drop_table(table)
+  rename_table(table,new_name)
+
+  -Column Migrations
+  add_column(table, column, type, options)
+  remove_column(table,column)
+  rename_column(table, column, new_name)
+  change_column(table, column, type, options)
+
+  -Index Migrations:
+  add_index(table,column,options)   #options unique:true/false, name:"fdf"
+  remove_index(table,column)
+
+  Note- Add Index on all your foreign keys and all the columns that should be used frequently.
+
+  -- Table column types : binary, bool ,date,datetime,decimal, float, integer, string, text, time
+  
+  Models
+  ------
+    - If the name of model is different from table name, we have to explicitly define the table name inside model.
+    self.table_name = "admin_users"
+
+DB CRUD operations
+------------------
+  -Create
+  --------
+  subject = Subject.new(<column_name>: value )
+  subject.new_record?
+  subject.save
+
+  -Update 
+  -------
+  1.find/update_attribute   #subject = Subject.find(1)
+  2.update:  #subject.name = "sads"
+  3.save     #subject.save
+
+  directly (instead of 2 & 3): subject.update(key-value attrs)
+
+  -Delete Records
+  ---------------
+  1. find   #subject = Subject.find(1)
+  2. destroy  #subject.destroy
+  (objext still in memory as readonly or frozen)
+
+
+  Find records:
+  -------------
+    Subject.find(<Primary Key>)  #return object or error  if not found
+    Dynamic finders: Subject.find_by_<attribute>(<attr_value>) # return object or nil. eg: Subject.find_by_id(1)
+    All: Subject.All  #returns array of object
+    Subject.first/last       # return object or nil.
+
+Querying with AR
+-----------------
+String: "name=Test AND visible=true"
+Array: ["name=? AND visible=true", "Test"]
+Hash: {:name=>"Test", :visible=>true} #no OR, LIKE,lt,gr
+
+Query methods:
+- order(string)
+  
+  eg. order(:position)
+      order("position")
+      order(:position => asc) or desc
+      order("position ASC") or DESC
+on joined tables 
+
+
+- limit(integer)
+-offset(integer)
+
+Named Scopes:
+--------------
+Queries defined in a model.
+Defined using ActiveRelation query methods.
+Can be called like ActiveRelation methods
+Can accept parameters
+Rails 5 requires lambda syntax
+
+scope :with_content_type, lambda {|ctype|
+ where(:content_type=>ctype)
+ } is equivalent to 
+
+ def self.with_content_type(ctype)
+    where (:content_type=>ctype)
+ end
+ 
+ Call the function as : Section.with_content_type('html')
+
+ In lambdas it is evaluated, when called
+
+ Relationships:
+ --------------
+ 1:1 - Utility- Breaking data into separate tables (to decrease complexity, or to improve DB performance)
+  belongs to must have a Fk.
+  Customer has_one :billing_address
+  eg, Subject-Page
+
+    Subject has_one :page
+    Page belongs_to :subject
+
+ Additional has_one/belongs_to Methods:
+    subject.apge
+    subject.page = page
+
+    page.subject
+    page.subject = subject
+
+ 1:M:
+  Subject has_many :pages
+  Page belongs_to :subject
+
+  access: subject.pages
+  add new page: subject.pages <<page
+  subject.pages.delete(page)
+  subject.pages.destroy(page)
+  subject.pages.clear
+  subject.pages.empty?
+  subject.pages.size
+
+belongs_to Mandatory in rails 5.0 
+
+M:N Associations:
+-----------------
+Project has_and_belongs_to_many :collaborators
+BlogPost has_and_belongs_to_many :catogeries
+
+No Pk required (:id=>false)
+
+In our scenario: AdminUser-Page
+create a join table, through migrate.
+
+Rich join:
+create new class,
+use two belongs to 
+
+CRUD REST & Resourseful API's
+------------------------------
+
+CRUD            Action              Description               Examples
+-----------------------------------------------------------------------------
+create            new       Display new record form        /subjects/new
+                create      Process new record form       /subjects/create
+
+------------------------------------------------------------------------------
+read            index         List records                /subjects/index
+                show          Dislay a single record     /subjects/show/:id
+
+------------------------------------------------------------------------------
+Update          edit         
+                update
+
+------------------------------------------------------------------------------
+delete          delete
+                destroy
+
