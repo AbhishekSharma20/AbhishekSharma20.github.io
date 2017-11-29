@@ -1,0 +1,1255 @@
+*********************
+Author: Harshit Gupta
+Date: 26 Sept, 2016
+Source: Lynda.com
+Remarks: Amazing. Best thing on Web for Rails!
+*********************
+
+Ruby is an object oriented programming language while Rails is a framework.
+
+Framework: A set of code libraries and data-structures that provide generic functionality that can be used, overridden, or further specialized.
+
+Principles followed by Ruby on Rails
+1. DRY
+2. Convention over Configuration: The code is pre-configured with defaults with the most common usages which would speed up development and less code to maintain.
+3. Rails follows MVC framework:
+M- Model: Data objects that we use.
+V- View: Webpages, CSS, JS
+C- Controller: Controls the interactions between our models and views. It contains the logic of what should be the response when a request is made.
+Browser -> Controller -> Model -> DB -> Model -> Controller -> View -> Browser
+
+-----
+1. Creating Project: rails new <app_name> -d mysql
+  the default database would be SQLite, but we can change it using the -d switch and here we are making it as mysql.
+
+2. Starting up the rails DB.
+    Type on console to start mysql: mysql -u root(this is the username) -p
+    Create a database:
+      - CREATE DATABASE app_name_development;
+      - CREATE DATABASE app_name_test;
+    Create a user to access the database:
+      - GRANT ALL PRIVILEGES ON app_name_development.* TO 'rails_user'@'localhost' IDENTIFIED BY 'secretpassword';
+      - GRANT ALL PRIVILEGES ON app_name_test.* TO 'rails_user'@'localhost' IDENTIFIED BY 'secretpassword';
+      - Now go to the config/database.yml file and change the username and password so that rails can login correctly.
+      - Typing rails db:schema:dump would go to the database and dump the whole database to a text file(db/schema.rb) in a specific format.
+      - Now access mysql using the statement:
+        mysql -u rails_user -p (using this would ask for password) app_name_development (mentioning the db name here)
+
+3. Start up the rails server
+  - rails server
+
+4. Generate a controller and a view
+  - rails generate controller <name(Plural)> <actions here like index, create, new...>
+    This would create the <action given>.html.erb file in the view directory.
+
+5. Generate a migration:
+  - rails generate migration <MigrationName>
+
+6. Generate a model
+  - rails generate model <ModelName>
+    Ex:
+      rails generate model Subject
+
+7. Run a migration:
+    rails db:migrate
+
+8. Reversing a migration to start:
+    rails db:migrate VERSION=0
+      This would reverse it to the blank empty db and you can see that in the file db/schema.rb file. It reverts all the migration in reverse order of the creation.
+
+9. Checking status of all migrations:
+    rails db:migrate:status
+      This would show you all the migration and their status (Are they 'up' or 'down' ?)
+
+9. Reversing only one migration:
+    rails migrate VERSION=migration_id
+      This would run all the migrations till that one. Lets say there are 10 migrations and we specified 5th one, it would run all the first 5 migrations. Very obviously, it does so with its name which tells it the timestamps and so it knows which was migration was made before/after a specific migration.
+      Note: you can know the migration_id with the "rails db:migrate:status" command.
+
+10. Start a rails console.
+    rails console
+    rails c
+
+11. To see all the routes, we can fire the command:
+    rails routes
+
+12. Clear log files:
+      rails log:clear
+
+-----
+
+Misc:
+1. You must run bundle install if you make changes to the Gemfile. It updates the bundle of gems that we are using. "bundle" is a part of the ruby gem called 'bundler'.
+2. Typing rails db:schema:dump would go to the database and dump the whole database to a text file(db/schema.rb) in a specific format.
+3. Using layout false in the controller would disable the layout.
+4. App would 1st look for the required page in the public directory and if it finds that, it would straight away render it without going into the rails framework. But if it doesn't find, it will go in the rails framework and then search for routes, controllers and views to render. you can confirm this by putting a file in public directory and then see it in the browser but no logging information regarding the rendering of the page would be done in the server log or the terminal.
+5. If we have the same named file in both public and view directory, then it would render the file in public directory and exit without going in the rails framework.
+6. We can use the render method to display custom view files from the controller action.
+render(:template => 'demo/hello') or
+render('demo/hello') or
+render('hello')
+would render the hello.html.erb even though we have written it inside the index action of demo controller.
+6. How is view able to know the instance variables from the controller? => Controller is inherited from ActionController and View is inherited from ActionView and both ActionController and ActionView are part of ActionPack. This is how View is able to know the instance variables. TODO: Why can't it access the local variables?
+7. There's one good feature in ruby on rails that it mostly DOESN"T differ between a symbol(:id) and a string ('id') which is there in Ruby.
+8. The params hash values passed are always string so if you try to add it with a number then it will fail saying can't add String with an integer. So you can't print something like <%= params[:id]+1 %> since params[:id] is a string but 1 is an integer. You can use to_i to get pass this problem.
+9. CRUD: Create, Read, update and Delete.
+10. We should not access the database as root user and always create a new user to access the db.
+  GRANT ALL PRIVILEGES ON db_name.*
+  TO 'username'@'localhost'
+  IDENTIFIED BY 'password';
+
+  SHOW GRANTS FOR 'username'@'password'
+
+11. Model Name:       Singular (filename and class)
+    DB Migrations:     Plural (tablename, filename and class)
+    Controller:       Plural
+    belongs_to:       Singular
+    has_many:         Plural
+
+12. If you're doing something like rename_table in any migration then that should be reflected in the modelname and model class as well. We can get past this by simply changing the class name and filename for the model, or add a line " self.table_name = "admin_users" "
+
+13. destroy and delete are two different methods in rails. delete bypasses several of the things and so it is not a good practice to use delete very often.
+
+14. We can know the SQL statement behind the Ruby code with the to_sql method.
+  Ex:
+    subjects =  Subject.where(:visible => true)
+    subjects.to_sql
+      => "SELECT `subjects`.* FROM `subjects` WHERE `subjects`.`visible` = 1"
+
+15. In Rails 5.0, there is a presence validator for the belongs_to relationship which won't allow us to save the value in the database of its own. This means that we must have a has_one or has_many on the opposite side of the belongs_to relation. We can disable this by changing in the configuration files but that would apply to all the models. If we want this for specific cases then we should use the option called this in the association. {:optional => true}.
+
+16. To view the errors while saving or creating an active record object, we can do object.errors.full_messages
+
+17. Rails follows REST(Representational State Transfer) design concept. It says that our application should not perform procedures but perform state transformations upon resources.
+
+18. We need to decide between resourceful routes and simple routes and what to use in which condition. Always follow a simple rule, if the route has something to do with the model(resource), then use resourceful routes. If the route has nothing to do with models, or just renders a static page, then make that a simple route( consider an AboutUs page which would just render a static html page)
+
+19. Use layouts and partial templates to make your code DRY.
+
+20. There's a difference between validates_length_of :name, :minimum => 1 and validates_presence_of :name. First is that they would print different messages when the data is not valid and secondly, validates_length_of allows spaces to be present in the data while validates_presence_of won't consider that. So, when :name = " ", then this would make the data valid with validates_length_of but not with validates_presence_of.
+
+21. One very helpful method that is defined on Active record models is valid?. One can simply make an instance of a model in rails console and run .valid? on top of that. What it would do is run all the validations and give us the result in true/false. We can then check the .errors.full_messages to know why it failed.
+
+22. Controller Filters that are defined in ApplicationController are inherited by all controllers. If you want to skip those, then you can use the filters: skip_before_action, skip_after_action, skip_around_action.
+
+23. We can access the params array in the controller to know which action is being called like this: params[:action].
+
+Routes
+======
+- Simple Route:
+    A simple route called get "demo/index" can also be written as
+      match "demo/index", :to => "demo#index", :via => :get
+
+- Default Route:
+    get ':controller(/:action(/:id))' would assume the arguments of the link to be of this form. This might go away in future versions of rails.
+
+- Root Route:
+    root 'demo#index' would be a root route. Everything would be routed to this thing if it doesn't match anything else.
+
+- Resourceful Route:
+    resources :demo , this would define 7 routes for CRUD  actions. It would not define route for the delete action. To add route for delete we can do something like this:
+      resources :subjects do
+        member do     # member routes on a member of the resource, which means they expect a :id in the url. edit and update are its examples.
+          get :delete     #added route delete
+        end
+
+        collection do   # collection routes operates on a resource as a whole meaning they don't expect a :id in the url. index, new and create are examples.
+          get :export   # added subjects/export
+        end
+      end
+
+    We can use the :except and :only for excluding or selecting only few actions(not all CRUD).
+    Please check the resourceful routes image for more details.
+
+  * Resourceful URL Helpers:
+    Instead of specifying the complete controller,action details, we can use the URL Helpers that rails provide us with the resourceful routes.
+
+    Instead of {:controller => 'subjects', :action => 'show', :id => 5}
+    we can simply use
+      subject_path(5)
+
+      subjects_path => index => GET (<---PLURAL)
+      subjects_path => create => POST (<---PLURAL)
+      subject_path(:id) => show => GET
+      subject_path(:id) => update => PATCH
+      subject_path(:id) => destroy => DELETE
+      new_subject_path => new => GET
+      edit_subject_path(:id) => edit => GET
+      delete_subject_path => delete => GET
+
+TIP: We need to decide between resourceful routes and simple routes and what to use in which condition. Always follow a simple rule, if the route has something to do with the model(resource), then use resourceful routes. If the route has nothing to do with models, or just renders a static page, then make that a simple route( consider an AboutUs page which would just render a static html page)
+
+Controller
+==========
+- A controller has 2 choices to do. Either render to a web page or redirect to another controller which would handle the same two choices.
+- We need to understand that a 'redirect' is actually making a "NEW REQUEST" and not working on the same request. What happens behind the scene is when you redirect from controller A to controller B then web server gets a status code 302 and it understands that it wants to send a new request to controller B and so it sends a new request. So, eventually it's not just 1 one but 2 requests. You can even see the url change in the browser.
+- We can write redirect like this: redirect_to(:controller => 'demo', :action => 'index') or redirect_to(:action => 'index') if it is the same controller where we want the redirect to happen. You can even redirect to a whole new website like this: redirect_to('http://lynda.com')
+- params[:id] or params['id'] can be used in the post request to access the form data. Remember that params passed are always string so if you try to add it with a number then it will fail saying can't add String with an integer.
+
+- Read Action: Index
+  It displays all the records and links to show, edit or delete them.
+
+  def index
+    @subjects = Subject.sorted # Note that sorted is a scope defined in the model. Search for scope :sorted in this doc.
+  end
+
+- Read Action: Show
+  It displays one record.
+  You can have links from index.html.erb with any of these but the 1st one is preferred :
+
+    <%= link_to("Show", subject_path(@subject.id), :class =>'action show')%>
+
+    <%= link_to("Show", 'subjects/#{@subject.id}', :class =>'action show')%>
+
+    <%= link_to("Show", {:controller => 'subjects', :action => 'show', :id => @subject.id}, :class =>'action show')%>
+
+  def show
+    @subject = Subject.find(params[:id])
+  end
+
+- Create Action: New
+  It creates a new object which would be saved into the DB table.
+    <%= link_to("Add New Subject", new_subject_path, :class =>'action new')%>
+
+  def new
+    @subject = Subject.new # Creating an object like this to make a form so that we can pull in values.
+    # @subject = Subject.new({:name => "Default"}) for default values
+  end
+
+- Create Action: Create
+  It can be done in 4 steps:
+    x. Instantiate a new object using form parameters.
+    x. Save the object.
+    x. If save success, redirect to the index action
+    x. If save fails, redisplay the form so user can fix problem.
+
+  def create
+    @subject =  Subject.new(params[:subject]) # Create an object to get all those values from the form.
+    if @subject.save
+      redirect_to(subjects_path)
+    else
+      render('new') # Forms would be auto-filled because new.html.erb which is called would want @subject to be passed to it and this @subject here is having all the values.
+    end
+  end
+
+- Update Action: Edit/Update
+  It should edit the row that we would pass through @subject.id
+    <%= link_to("Edit Subject", edit_subject_path(@subject), :class =>'action edit')%>
+
+  def edit
+    @subject = Subject.find(params[:id])
+  end
+
+  def update
+    @subject = Subject.find(params[:id])
+    if @subject.update_attributes(subject_params)
+      redirect_to(subject_path(@subject))
+    else
+      render('edit')
+    end
+  end
+
+- Delete Action: Delete/Destroy
+  Delete Form is actually a confirmation page for destroy confirmation. It's up to you as far as the implementation is considered. You can give warnings, confirmations or display record attributes. It is also not necessary and is often omitted.
+    <%= link_to("Edit Subject", delete_subject_path(@subject), :class =>'action delete')%>
+
+    def delete
+      @subject = Subject.find(params[:id])
+    end
+
+    def destroy
+      @subject = Subject.find(params[:id])
+      @subject.destory
+      redirect_to(subjects_path)
+    end
+
+
+- Mass Assignments and Strong Parameters
+  Mass Assignment is a rails term for passing a hash of values to an object to be assigned as attributes.
+   Ex: Subject.new(params[:subject]) (Read on ERB Forms part for more details on how params[:subject] is a hash of values.)
+
+   Strong Parameters is the solution to the problem of Mass Assignment where one can permit there params to be available for mass assignments.
+    params.permit(:first_name, :last_name) # permits
+    params.require(:subject) # returns :subject hash, similar to params[:subject]
+    params.require(:subject).permit(:name, :position, :visible # is used most commonly when we are using Form Array to keep all the form data together so that we don't need to generate a hash on our own.
+
+- Flash Hash
+  This hash would store messages in a session data and when same user is requesting a page twice then we can recognise the user with the help of session data. Flash Hash clears old messages after every request
+  Ex:
+    flash[:notice] = "The subject was created successfully"
+    flash[:error] = "Not enough access privileges"
+
+  We can also send objects in this hash but it is not a good practice to do so because it is stored in session and we don't have a great deal of memory in our session. It is just designed to store messages between requests.
+  Ex:
+    def update
+      @subject = Subject.find(params[:id])
+      if @subject.update_attributes(subject_params)
+        flash[:notice] = "The "#{@subject.name}" was updated successfully"
+        redirect_to(subject_path(@subject))
+      else
+        render('edit')
+      end
+    end
+
+    def destroy
+      @subject = Subject.find(params[:id])
+      @subject.destory
+      flash[:notice] = "The "#{@subject.name}" was deleted successfully"  #Note that we have destroyed the data but we can still access it for reading purpose. This is one great use of a Frozen Hash
+      redirect_to(subjects_path)
+    end
+
+  ERB Code to display flash data is to be kept before everything in out xxx.html.erb files
+
+    <% if !flash[:notice].blank?%>
+      <div class="notice">
+        <% flash[:notice] %>
+      </div>
+    <% end %>
+
+- Controller Filters
+  They execute code before or after a controller action.
+  They filter requests before allowing actions.
+  They remove code duplication.
+  Mostly used in doing "house-keeping" tasks mostly setup or cleanup.
+  Remember that controller filters defined in ApplicationController are inherited by all controllers. If you want to skip those, then you can use the filters: skip_before_action, skip_after_action, skip_around_action.
+  Example:
+    Confirm user authentication.
+    Set variables and default values(maybe needed by the action or by the template to be rendered.)
+    Find database objects.
+
+  * before_action:
+    Runs the method(s) before performing the action.
+    Note that any render or redirect in the method of before_action prevents its "action" execution. Why? Lets say the user is not authorized then we would want to redirect them to a login page instead of showing data. So, here we don't want the "action" to be executed if there is a redirect.
+    We can also activate this method only for specific actions with help of :only and :except attributes.
+      before_action :find_subjects :only => [:new, :edit]
+      # action ...
+
+      private
+
+      def find_subjects
+        @subjects = Subject.sorted
+      end
+
+  * after_action:
+    Runs the method(s) before performing the action.
+
+      after_action :find_subjects
+      # action ...
+
+      private
+
+      def find_subjects
+        @subjects = Subject.sorted
+      end
+
+  * around_action: before_action + after_action
+
+
+Views
+=====
+- We can use the render method to display custom view files from the controller action.
+render(:template => 'demo/hello') or
+render('demo/hello') or
+render('hello')
+would render the hello.html.erb even though we have written it inside the index action of demo controller.
+
+- ERB
+  - There are two ERB syntaxes. They are: <%some code%> and <%= some code %>
+  - the first syntax doesn't output the ruby code while the second one returns the output of the ruby code. <% 1+ 1 %> wouldn't output anything on the screen but <%= 1+ 1 %> would output 2 on the screen. So we can use them together like this: <% x = "world" %> <%= "Hello #{x}" %> to output Hello world
+  - If you want to write the ruby code like this in erb:
+      3.times do |n|
+        puts n
+      end
+
+    then write it like(Output: 0,1,2)
+      <% 3.times do |n| %>
+      <%= n %>
+      <% end %>
+
+    NOT like (Output: 3)
+      <%=
+      3.times do |n|
+        puts n
+      end
+      %>
+
+    The reason being the later one sends the output of the whole code which is 3 and not the individual data.
+  - <%= link_to(text to show, target link) %>
+      This would generate text on clicking which we are redirected to the target given. We can write:
+        <%= link_to(demo, "demo/index") %> OR
+        <%= link_to(demo, {:controller => 'demo', :action => 'index'}) %>
+
+- Forms
+  Here is a simple HTML form:
+    <form action="/subjects", method="post">
+      <input type="text" name="name" />
+      <input type="text" name="position" />
+      <input type="text" name="visible" />
+
+      <input type="submit" value="Create Subject" />
+    </form>
+
+  Now we can write it in ERB something like this:
+    <%= form_for  %>
+
+  Now if we want to have the object called subject, then we would have to group all the data and form a hash like this:
+    subject = Subject.new (
+      {
+        :name => params[:name],
+        :postion => params[:position],
+        :visible => params[:visible]
+      }
+    )
+
+  This is not a good implementation since we would have to create an object on our own. But we can solve this using Form Arrays.
+    The form array implementation would make the HTML look something like this(note the name of the field):
+      <form action="/subjects", method="post">
+        <input type="text" name="subjects[name]" />
+        <input type="text" name="subjects[position]" />
+        <input type="text" name="subjects[visible]" />
+
+        <input type="submit" value="Create Subject" />
+      </form>
+
+    ERB Code:
+
+      <%= form_for(@subject) do |f| %>  # Making a form builder object called 'f'
+        <%= f.text_field(:name) %>
+        <%= f.text_field(:position) %>
+        <%= f.text_field(:visible) %>
+        <%= f.submit("Create Subject") %>
+      <%= end %>
+
+    Now all the params are arranged under a common key and can be accessed all at once by just saying params[:subject]. Individual params can also be accessed like this: params[:subject][:name], params[:subject][:position]. Now that cumbersome part of code can be simply changed without building the hash to:
+      subject = Subject.new(params[:subject])
+
+- Form Helpers
+
+  * text_field
+
+    Tag Style: <%= text_field_tag('name', params[:name]) %>
+
+    Object aware Style: <%= text_field(:subject,:name) %>
+
+    Form Builder Style: <%= f.text_field(:name) %>
+
+  * password_field
+  * hidden_field
+  * text_area
+  * radio_button
+  * check_box
+  * label
+  * file_field: # requires (:multipart => true)
+
+- Form Options Helpers
+
+  * f.select(object, attribute, choices, options, html_options)
+    Options:
+      :selected => object.attribute
+      :include_blank => false
+      :prompt => false
+      :disabled => false
+    Ex:
+      f.select(:position, 1..@subject_count) # Make sure you define and assign the @subject_count variable in your controller. If you are doing this in a _form.html.erb, then make sure all the actions in the controller have that variable @subject_count.
+      f.select(:subject_id, @subjects.map {|s| [s.name, s.id] }) # Here the 1st one(s.name) would be the label but the actual value that gets submitted to the form would be s.id which looks perfect because we would want the user to select from subjects maths, chem, physics but want to submit the id which is unique
+
+- Date Time Form Helpers
+
+  * date_select(object, attribute, options, html_options)
+    Options:
+      :start_year => Time.now.year - 5
+      :end_year => Time.now.year - 5
+      :order => [:year, :month, :day]
+      :discard_year => false
+      :discard_month => false
+      :discard_day => false
+      :include_blank => false
+      :prompt => false
+      :use_month_numbers => false
+      :add_month_numbers => false
+      :use_short_month => false
+      :date_separator => ""
+
+  * time_select(object, attribute, options, html_options)
+    Options:
+      :include_seconds => false
+      :minute_step => 1
+      :include_blank => false
+      :prompt => false
+      :time_separator => ":"
+
+  * datetime_select(object, attribute, options, html_options)
+    Options:
+      all previous options
+      :datetime_separator => "-"
+
+    Ex:
+      f.datetime_select(:created_at, :order => [:month, :day ,:year])
+
+- Form Errors
+    Consider simple validation like
+      validates_presence_of :name
+    Now if we don't pass the name, rails won't allow us to save it in the database and would generate an error at object.errors which is an array containing errors added by validations. We can then display the array element on the page asking user to fix that (or provide a name), without accessing this, it would be a hard time for the user to know the reason why the form is not being submitted. So, it is a good practice to show these errors whenever a validation fails.
+
+    object.errors.clear
+    object.errors.size
+    object.errors.each {|attr, msg| p attr, msg} # :name, "can't be blank"
+    object.errors.full_messages.each {|msg| p mesg } # Name can't be blank
+
+    We have two choices of displaying errors:
+      - List the errors above the form
+        We can create an html partial which would have everything that we need to display the errors (app/views/application/_error_messages.html.erb)
+
+          <% if object && object.errors.size > 0 %>
+            <div id="error-explanation">
+              <h2> <%= pluralize(object.errors.size, "error") %> prohibited this record from being saved </h2>
+              <p> There were problems with the following fields: </p>
+              <ul>
+                <% object.errors.full_messages.each do |msg| %>
+                  <li> <%= msg %>
+                  <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+        Then we would create a custom helper that would display an error for us (error_messages_for(:object))
+          We can skip this step and put this partial anywhere we needed it just like we did for (_form.html.erb) but it's a good idea to make a helper method and just call that whenever needed.
+          Open the app/helpers/application_helper.rb and define a method
+            def error_messages_for(object)
+              render(:partial => 'app/error_messages', :locals => {:object => object})
+            end
+
+        Now we can simply call this error handler method from any form partial file, lets say _form.html.erb like this in the beginning of the file.
+          <%= error_messages_for(f.object) %>
+
+      - Print and highlight errors with each form input
+
+
+  Q. Create a link back to the subjects/index ?
+    <%= link_to("<<Back to List", subjects_path, :class => 'back-link') %>
+  Q. What does <%= form_for(@subject) do |f| %>  mean in the file new.html.erb ?
+    <%= form_for(@subject) do |f| %>  actually means something like this:
+    <%= form_for(@subject, :url => subjects_path, :method => 'post') do |f| %>
+  Q. What does <%= form_for(@subject) do |f| %>  mean in the file edit.html.erb ?
+    <%= form_for(@subject) do |f| %>  actually means something like this:
+    <%= form_for(@subject, :url => subject_path(@subject), :method => 'patch') do |f| %>
+  Q. What does <%= form_for(@subject, :method => 'delete') do |f| %>  mean in the file delete.html.erb ?
+    <%= form_for(@subject, :method => 'delete') do |f| %>  actually means something like this:
+    <%= form_for(@subject, :url => subject_path(@subject), :method => 'delete') do |f| %>
+      Note that we must specify the :method => 'delete' here and this is not optional because if not specified it would consider it for 'update' as it's syntax is also same.
+
+- Layouts
+  Most of our webpages would share a common structure. The header, footer, stylesheet, and navigation bars. SO, it would make more sense if we would keep them at one place and then re-use it ( DRY code).
+    We can write a layout and then drop any html.erb file in it with the help of the statement <%= yield %>
+    By default all the html.erb files would have the layout views/layouts/application.html.erb
+    If we want a specific controller to use a new layout(admin.html.erb) we need to define it and then use the statement < layout 'admin' > in out controller.
+
+    A Cool Thing about layouts is let's say we are to display a dynamic page title in all the pages, we can simply do that by setting an instance variable in the controller and then using it in our layout. But what we can also do is, set the instance variable in the html file and it would still be able to figure out the value of the instance varible. Note that the <%= yield %> would be much more later(where we defined @dynamic_title) than the Title part (where we are using the @dynamic_title) but still rails would figure out the value of it and then set it up.
+
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title> My app name: <%= @page_title || "Admin area" %> </title> <!-- Using page title here but setting up the @page_title variable in the yield part. -->
+        </head>
+
+        <body>
+          <%= yield %>
+        </body>
+      </html>
+
+- Partial Templates
+  Some of our templates are very similar to each other (new and create are similar, edit and update are also similar ). Here, we are repeating ourselves also because it is mostly true that when we are going to add a thing in edit.html.erb, we would also add them in update.html.erb. We can make our code DRY with the help of partial templates.
+
+  Partials are always named with an underscore and for a form partial template they are mostly named as _form.html.erb
+
+  So after write all the repeatable coed in one place at _form.html.erb, we can now call that part of the form from our file like this:
+    <%= render(:partial => 'form'%>
+  But we would want the form builder variable |f| to be available in our partial template because we have used it there. We can pass it to the template like this:
+    <%= render(:partial => 'form', :locals => {:f => f}) %>   # Passing a hash with key as passed variable name and value as what it would be here. If we pass {:myvar => f}, then instead of f in the form we would have to use myvar as the form builder object.
+
+- Text Helpers
+  * word_wrap: This is used when we have long sections of text and we want to wrap that text so that it is no longer of a certain line length, then we can do it like this:
+    <%= word_wrap(text, :line_width => 30)%> # line_width by default is 80
+  Note that html won't respect these line breaks(\n) which are setup by this helper. We need to cover our html under the <pre> </pre>tags. Line break to html is a <p> tag or a <br> tag, not "\n"
+
+  * simple_format(text): is a better solution and works on some simple rules :
+    converts each \n in the text to \n<br/>
+    encloses whole string within the <p> tags.
+
+  * truncate: When we have a really long text and want to convert it into something like t...
+    We can use truncate here and set up a certain length ending with ... by default but this can also be changed.
+      <%= truncate(text, :length => 28) %>
+
+  * pluralize: We can have singular and plural results on basis of what would be the data. SO this method can help us without taking the pain of writing special cases.
+    <% [0,1,2].each do |n| %>
+      <%= pluralize(n, 'product') %> found. <br/>
+    <% end %>
+  would give the output as
+    0 products found.
+    1 product found.
+    2 products found.
+
+  * truncate_words
+  * highlight
+  * excerpt
+
+- Number Helpers
+  * number_to_currency(34.5) => $34.50
+  * number_to_currency(34.5, :precision => 0, :unit => "kr", :format => "%n %u") => 35 kr
+  * number_to_percentage(34.5) => 34.500%
+  * number_to_percentage(34.5, :precision => 1) => 34.5%
+  * number_to_rounded
+  * number_to_human
+  * number_to_human_size
+  * number_to_phone
+
+  Can be used with
+    :delimitor -> Delimits thousands; default is ","
+    :separator -> Decimal separator; default is "."
+    :precision -> Decimal places to show; default varies(2-3)
+
+- Data and Time Helpers
+  Time.now + 30.days - 23.minutes
+  30.days.ago => Time.now - 30.days
+  30.days.from_now => Time.now + 30.days
+  Others:
+    last_week
+    end_of_day
+    tomorrow
+    next_year
+    beginning_of_day
+    yesterday
+
+- Custom Helpers
+  We can write custom helper methods(in Ruby) in the app/helpers directory and then use them instead of writing them in the view files with those irritating <%%> tags. So, if you find yourself writing a lot of Ruby code in your views, you would probably want them to become helper methods and then call them. But remember these places are just for views rendering, anything that you write here would be purely for views and won't be available in controller or models.
+
+- Sanitization Helpers
+  * Cross-Site Scripting(XSS): We need to prevent XSS. If a hacker submits a string, which make our browser do things that we don't intend to. It lets the hacker use javascript to script on our site. Hacker can redirect user to another web page, steal cookie data, steal login information.
+
+  * Undesirable HTML: All the data like URL parameters, Form parameters, Cookie data and DB data in the html type has to be safe. We need to escape all our data. We can do it using the html_escape() or simply h() method. It would convert all our html tags(>) into html character entities(&gt). By default, Rails would escape all our data using these methods. We can use the methods raw() and .html_safe to mark some specific strings as safe and not escape them.
+
+  * strip_links
+  * strip_tags
+  * sanitize
+
+Validations
+===========
+- Validation Methods
+  * validates_presence_of(attr, hash_of_options )
+    This would raise errors when attributes are blank(nil, false, "", " ", [], {})
+    Ex: validates_presence_of :name
+
+  * validates_length_of(attr, options)
+    options:
+      :is
+      :minimum
+      :maximum
+      :within
+      :in
+    Ex: validates_length_of :name, :maximum => 255
+        validates_length_of :permalink, :within => 3..255
+
+  * validates_numericality_of(attr, options)
+    attribute must be integer or floating point number
+    options:
+      :equal_to
+      :greater_than
+      :less_tha
+      :greater_than_or_equal_to
+      :less_than_or_equal_to
+      :odd
+      :even
+      :only_integer
+
+  * validates_inclusion_of(attr, options)
+    attribute must be in a list of choices(range or array)
+    Ex: validates_inclusion_of :name, :in => ['ram', 'shyam']
+
+  * validates_exclusion_of(attr, options)
+    opposite of validates_inclusion_of
+
+  * validates_format_of(attr, options)
+    attributes must match a regular expression.
+    Ex: validates_format_of :email, :with => /\w@\w.com/
+
+  * validates_uniqueness_of(attr, options)
+    attribute must not exist in the database. Unlike others this would make a database call.
+    Ex: validates_uniqueness_of :username, :case_sensitive => true, :scope => :company_id
+
+  * validates_acceptance_of(attr, options)
+    Attributes must be 'accepted' like tick a checkbox
+
+  * validates_confirmation_of(attr, options)
+    Must be confirmed by entering it twice. It creates a virtual attribute just to make sure if it already matched with the 1st time value.
+
+  * validates_associated(attr, options)
+    Associated object or objects -- must be valid.
+
+  OPTIONS FOR ALL VALIDATIONS:
+    :allow_nil
+    :allow_blank
+    :on => :save/:create/:update
+    :if => :method (a method defined in a model should return true/false)
+    :unless => :method
+
+  One very helpful method that is defined on Active record models is valid?. One can simply make an instance of a model in rails console and run .valid? on top of that. What it would do is run all the validations and give us the result in true/false. We can then check the .errors.full_messages to know why it failed.
+
+  SEXY VALIDATIONS
+  validates :email, :presence => true,
+                    :length => { :maximum => 50 },
+                    :uniqueness => true,
+                    :format => { :with => EMAIL_REGEX},
+                    :confirmation => true
+
+- CUSTOM VALIDATIONS
+  We can write custom validations in out mdoel like this:
+
+    FORBIDDEN_USERNAMES = ['admin','user','osama']
+    validate :username_is_allowed
+
+    private
+
+    def username_is_allowed
+      if FORBIDDEN_USERNAMES.include(username)
+        errors.add(:username, "has been restricted from use.") #Adding an error in the error array.
+      end
+    end
+
+Cross-Site Request Forgery
+==========================
+  This is a security feature which is turned on as by default.
+  CSRF is a type of attack on a website which exploits user's currently logged-in state to perform actions which require authentication.
+  Ex: Imagine you logged in your bank's website and logged in. Instead of logging out, you close the browser. Now, you began surfing on the browser and open a website which shows you an image and you click it, but that image is actually a bad request to your bank's account and do something malicious but what you were thinking that it was just going to fetch an image(<img src="http://bank.com/transfer?amt=10000&to=hacker" />). Just because it was a image request, your browser would gladly send all the cookies and session data too. Because your bank login data is present in the session and cookies, the request would successfully be able to do it malign job thereby hurting you. This is Cross Site Request Forgery.
+  Not only transferring money but things like changing login credentials can be done if your app is not secure.
+  Preventing CSRF
+    - Require user authentication
+    - Regularly log out inactive users
+    - GET requests should be read-only
+    - Actions that expect POST requests should only respond to POST request.
+    - Rails also help us with this by generating an "authenticity_token" which is present in all the forms that it generated. This is also present in the session data, now if the request is submitted, it can compare the two and then decide if this form was generated by him or someone else. This is done automatically in the file app/controller/application_controller.rb
+      protect_from_forgery with: :exception
+    - If you're working with Javascript and Ajax then make sure you add <%= csrf_meta_tag %> to the head of your html page. This will ensure that javascript request also have access to this authenticity_token as normal html post request do.
+
+AUTHENTICATION
+==============
+- Never ever store passwords in database as plain texts. We need to  encrypt them and rails would it really easy for us.
+- One-Way Encryption Algorithm: Non-reversible, even by us. Input + same hashing algorithm = same output. Actual password would be encrypted and then stored. Now, when he tries to login 2nd time, it will attempt to encrypt it again and then compare. If both stored and the one made are same, user can login otherwise it would be a wrong password. Rails uses BlowFish as the one-way encryption algorithm.
+- Rails uses 'has_secure_password' method to be present in any model to make it secure. There are 2 prerequisites:
+  It must have the 'bcrypt' gem installed.
+  The table must have a string column called 'password_digest'
+- Adding 'has_secure_password' does a lot of things behind the scenes for us. It adds
+
+    attr_reader :password
+    validates_presence_of :password, :on => :create
+    validates_confirmation_of :password
+
+    def authenticate(unencrypted_password)
+      #...
+    end
+
+  Note that the first line would a variable called password and make that equal to the real password variable. It then makes password_digest = password but it DOES NOT save it. It defines a method authenticate which we can call to encrypt passwords.
+
+    user = AdminUser.first
+    user.password = 'mysecretpassword'
+    user.password_digest # "jkacrbcjhbahdbcsvbcheuigf56q7487923jisunbcrjkscbvghjd"
+    user.save # Saved successfully.
+
+    user2 = AdminUser.first
+    user2.authenticate('notthepassword') # false
+    user2.authenticate('mysecretpassword') # USER OBJECT received.
+
+- Create a controller for login.
+    rails g controller access menu login
+
+  Now we have to update the routes.rb file
+    get 'admin', :to => "access#menu" # This would enable to go to login when not logged in, menu when logged in. Because menu would redirect to login.
+    get 'access/menu' # Similar to index action
+    get 'access/login' # Similar to new
+    post 'access/attempt_login' # Similar to create
+    get 'access/logout' # Similar to destroy
+
+  Now we can write the controller:
+    class AccessController < ApplicationController
+      layout 'admin'
+      before_action :confirm_logged_in, :except => [:login, :attempt_login, :logout]
+
+      def menu
+        # Nothing but menu.html.erb
+      end
+
+      def login
+      # Nothing but login.html.erb
+      end
+
+      def attempt_login
+        if params[:username].present? && params[:password].present?
+          found_user = AdminUser.where(:username => params[:username]).first #.first since it returns an array.
+          if found_user #if not then array.first would be nil above and we don't need to check for password.
+            authorized_user = found_user.authenticate(params[:password])
+          end
+        end
+
+        if authorized_user
+          session[:user_id] = authorized_user.id
+          flash[:notice] = "You're now logged in!"
+          redirect_to(admin_path)
+        else
+          flash.now[:notice] = "Invalid username/password combination!" # DO it now and not keep it for the next request.
+          render('login')
+        end
+
+      end
+
+      def logout
+        session[:user_id] = nil
+        flash[:notice] = "Logged Out!"
+        redirect_to(access_login_path)
+      end
+
+      private
+
+      def confirm_logged_in
+        unless session[:user_id]
+          flash[:notice] = "Please log in."
+          redirect_to(access_login_path)
+          # Prevents the requested option from running. This is how before_action works.
+        end
+      end
+    end
+
+    Note that this WOULD allow me to log in to the other areas as other controllers don't have this before_action :confirmed_logged_in in them. So, we should write this in all the controllers whom we want to make secure and one efficient thing that we can do is, write this method "confirm_logged_in" in the ApplicationController instead of AccessController. So, we won't have to write this method in all the controller but they would be available automatically.
+
+
+Database
+========
+- Database: collection of tables
+- Index: Data structure on a table to increase lookup speed. Always put indexes on the foreign keys.
+- Foreign Key: Table column whose values reference rows in another table. Always put indexes on the foreign keys.
+- Some sql commands for DB:
+  - SHOW DATABASES;
+  - SHOW TABLES;
+  - SHOW FIELDS FROM table_name;
+  - CREATE DATABASE db_name;
+  - USE db_name;
+  - DROP DATABASE db_name;
+
+- We should not access the database as root user and always create a new user to access the db.
+  GRANT ALL PRIVILEGES ON db_name.*
+  TO 'username'@'localhost'
+  IDENTIFIED BY 'password';
+  SHOW GRANTS FOR 'username'@'password'
+- DB configuration can be done in the file config/database.yml file
+- Migration: set of db instructions in ruby. We can 'migrate' a db from one state to another. We can go 'up' or 'down' from one state to another.
+- Migration creates a method 'change' method for us but in reality is a shorthand for having separate 'up and 'down' method. 'up' method would have the changes that it should do in the db and 'down' method would have the reverse of that. Both are mirror images of each other. Rails is smart enough to know the difference and so it creates only method called 'change'. If we generate a migration for making a table then it is present in the method 'change'. Behind the scenes there would be an up method which would create the table and a down method which would drop the table. Running the migration runs only the code in the 'up' method.
+
+    def change
+      create_table :users do |t|
+        t.column "first_name", :string # long-type syntax
+        t.string "last_name" # short-hand syntax
+        t.timestamps
+      end
+    end
+
+    is equivalent to:
+
+    def up
+      create_table :users do |t|
+        ...
+        t.timestamps
+      end
+    end
+
+    def down
+      drop_table :users
+    end
+
+- "change" => "up" + "down"
+    Lets say we have:
+      def change
+        rename_table("users", "admin_users")
+        add_column("admin_users","username", :string, :limit => 25, :after => "email")
+        change_column("admin_users","email",:string, :limit => 100)
+        rename_column("admin_users","password","hashed_password")
+        add_index("admin_users","username")
+      end
+
+    This would actually be something like:
+      def up
+        rename_table("users", "admin_users")
+        add_column("admin_users","username", :string, :limit => 25, :after => "email")
+        change_column("admin_users","email",:string, :limit => 100)
+        rename_column("admin_users","password","hashed_password")
+        add_index("admin_users","username")
+      end
+
+      def down
+        remove_index("admin_users","username")
+        rename_column("admin_users","hashed_password","password")
+        change_column("admin_users","email",:string,:default => '', :null => false)
+        remove_column("admin_users","username")
+        rename_table("admin_users", "users")
+      end
+
+      * READ Misc(12) for rename_table problems
+
+- Column Types in Migrations: binary, boolean, date, datetime, decimal, float, integer, string, text, time.
+  Remember that these values are changed to the respective type of DB syntax by rails. This is one beautiful thing about migrations that it is DB independent. All MySQL, SQLite, etc would have same migration but rails would take care of changing it to the appropriate value in the respective DB. Like for MySQL, integer => int, string => varchar, text => text, etc...
+
+- Column Options: We can specify constraints for our columns.
+    :limit => size
+    :default => the default value
+    :null => true/false
+    :precision => a number
+    :scale => a number
+
+    Ex:
+      t.string "last_name", :limit => 50
+      t.string "email", :default => '', :null => false
+
+- t.timestamps in a migration is equivalent to
+    t.datetime "created_at"
+    t.datetime "updated_at"
+
+- All the tables would have a primary key named 'id' created automatically. Infact if you don't want it, you can specify it like this:
+    create_table :users, :id => false do |t|
+      ...
+    end
+
+- Table Migration Methods: These can be used in the "change","up" or "down" methods of the migrations.
+    * create_table(table, options) do |t|
+      ...
+    end
+    * drop_table(table)
+    * rename_table(table, new_name)
+
+    Ex:
+      rename_table("users", "admin_users")
+
+- Column Migration Methods: These can be used in the "change","up" or "down" methods of the migrations.
+    * add_column(table, column, type, options)
+    * remove_column(table, column )
+    * rename_column(table, column, new_name)
+    * change_column(table, column, type, options)
+
+    Ex:
+      add_column("admin_users","username", :string, :limit => 25, :after => "email")
+      change_column("admin_users","email",:string, :limit => 100)
+      rename_column("admin_users","password","hashed_password")
+
+- Index Migration Methods:
+    * add_index(table, column, options)
+    * remove_index(table, column)
+    Options:
+      :unique => true/false
+      :name => "your_custom_name"
+
+    Ex:
+      add_index("admin_users","username")
+
+- Migration Problems: It's pretty normal to run into migration problems. In that state, you won't be able to move your migration "up" or "down". This problem happens when you're running migrations and if it has 5 statements and it fails in the 4th one lets say. Now the 1st 3 are already run, so rerunning them would fail(up is failing) and the "down" way would also fail since it has old info. To solve this you can go in the sql database and handle things, or the best way would be comment out those 3 statements and then run the db:migrate (up). Now that you have completed that migration, you can uncomment those and then work flawlessly up or down.
+
+
+ActiveRecord / MODELS
+=====================
+- Active Record is a design pattern for relational databases. It is not something which is specific to rails but is a design pattern that rails follows. Rails implementation of the active record pattern is called "ActiveRecord".
+ - This pattern allows us to retrieve and manipulate data as objects, not as static rows.
+ - Active record objects are intelligent in the sense that they understand the structure of the table, contain data from table rows, know how to read, create, update and delete rows. It can be manipulated as objects; then saved easily.
+    Ex:
+      user = User.new # Makes an active record object
+      user.first_name = "Harry"
+      user.save   # SQL insert
+
+      user.last_name = "Potter"
+      user.save    # SQL update
+      user.delete
+
+      With just a simple .save we can insert, update and delete the rows. This is much simpler than typing raw SQL commands.
+
+- ActiveRelation: Simplifies the generation of complex database queries.This is also known as ARel sometimes. This is an object-oriented interpretation of relational algebra. It simplifies the generation of complex DB queries. It allows us to write small queries which can be chained later. Complex JOINS and AGGREGATIONS use efficient SQL. Queries don't get executed until needed. ActiveRecord uses ActiveRelation heavily for queries and managing relations between objects.
+  Ex:
+    users = User.where(:first_name => "Harry")
+    users = users.order("last_name ASC").limit(5)
+
+    # This does the same thing as the following SQL query but in chunks.
+
+    SELECT users.* FROM users
+    WHERE users.first_name = 'Harry'
+    ORDER BY users.last_name ASC
+    LIMIT 5
+
+- A model is inherited from a class called ApplicationRecord and that class in inherited from a class called "ActiveRecord"
+
+- In a rails model, when we inherit from ActiveRecord::Base, we gain a lot of active record properties that we can use. It knows the DB table(See how we can use the AdminUser.new) and how it looks like, what columns exists in the table(See how we used admin.first_name ?). It gives us attr_accessors on all the column so that we can read/write them in the controller. We can also define atrr_accessor in the model but that won't corresond to any of the DB tables and thus won't be saved.
+  Ex:
+    class AdminUser < ActiveRecord::Base
+      ..
+    end
+
+    #In controller probably,
+    admin = Adminuser.new
+    admin.first_name = "Harry"
+    admin.first_name
+
+- Create Records
+  * New/Save: It is a 3 step process each of which would be done separately.
+    - Instantiate Objects (subject = Subject.new)
+    - Set Values (subject.name = "First Sub")
+    - Save Object(subject.save)
+
+      We can do step one and two in just one step like this:
+      subject = Subject.new(:name => "First Sub", :position => 1, :visible => true). We can verify that it is not saved yet by the command: subject.new_record?  This would return yes. And if this returns true, this means it has not been saved into the db yet. If we do the 3rd step and then ask again subject.new_record?, it would reply false since it has been saved to the database.
+      ** This would return a "true/false" value based on if the object was saved or not saved. **
+
+  * Create: 1 step process where everything happens all-at-once.
+    - Instantiate, set values and save the object. (subject.create)
+
+      We can directly create and save together all at once with this statement (subject = Subject.create(:name => "Second Sub", :position => 2 ))
+      ** This would return a object **
+
+- Update Records
+  * Find/Save: 3 step process.
+    - Find a record (subject = Subject.find(1))
+    - Set values (subject.name = "Initial Subject")
+    - Save it (subject.save)
+
+      The 3rd step would execute a UPDATE query in the background(not a create one) and return a true/false value. It would update the updated_at field of the record.
+
+  * Find/update_attributes: 2 step process
+    - Find a record (subject = Subject.find(2))
+    - Set values and save ( subject.update_attributes(:name => "Next Subject", :visible => true) )
+
+- Delete Records
+  * Find/Destroy:
+    - Find a record (subject = Subject.find(2))
+    - Destroy it (subject.destroy)
+
+      It returns the object of it just to see(technically called a frozen hash). You can't update any of the attributes but you can read from that returned hash object.
+
+- Find Records
+  * Primary Key Finder
+    Subject.find(2)
+    Returns an object or an ERROR
+    Shouldn't be used because it raises an error. Instead use Dynamic Finders which returns nil instead of the nasty errors. We don't want the users to see error page very often.
+
+  * Dynamic Finders: Use this to search for records based on attributes
+    Subject.find_by_id(2)
+    Subject.find_by_name("First_subject")
+    Returns an object or NIL
+
+  * Find all
+    Subject.all
+    Returns an array of objects
+
+  * Find first/last
+    Subject.first
+    Subject.last
+    Returns an object or NIL
+
+- Query Methods:
+  * where
+    - Subject.where("name='Test' AND visible=true") # string, bad practice coz of vulnerability to SQL Injection.
+    - Subject.where("name=? AND visible=true","Test") # Array, flexible, escaped SQL and safe from SQL Injection
+    - Subject.where(:name => "Test", :visible => true) # hash, simplicity, safe from SQL Injection. Each key-value pair would be joined with an AND statement. Doesn't support OR, LIKE, less than or greater than.
+
+    We can chain different where clauses, if not putting all values in one single hash(both are actually same). One more interesting thing about 'where' is that it waits till the end for execution on DB. It is a kind of lazy execution.
+
+    This would always return an array. If it finds something, it would return an array of objects otherwise an empty array.
+
+  * order: We are going to specify the sorting order of the records.
+    - Subject.order(:position) # Would sort in ascending
+    - Subject.order("position") # Would sort in ascending
+    - Subject.order(:position => :desc) # Would sort in descending
+  * limit: will limit the results.
+    - Subject.limit(1)
+  * offset: skip over objects.
+    - Subject.limit(1).offset(2) # Would return the 3rd object because we are skipping the first two objects and asking for just 1 object.
+
+- Named Scopes: Rails gives us this feature to be defined in Models that are inherited by Active::Record.Base. They assign a name to an active record query and then we can call that query easily without writing the whole query again and again.
+
+  scope :visible, lambda {where(:visible => true) }
+    This is similar to defining a class method called visible like this:
+      def self.visible
+        where(:active => true)
+      end
+  scope :invisible, -> {where(:visible => false) } # Stabby lambda syntax
+  scope :sorted, lambda {order("position ASC")}
+  scope :newest_first, lambda {order("created_at DESC")}
+  scope :search, lambda { |query|
+    where(["name LIKE ?", "%#{query}%"] )
+  }   # Can accept parameters as well.
+
+  Why is a named scope required when we already have the "where" query method ?
+  >> Let's say we have a a query in which we want to show records that are 1 week old from Time.now. Rails would start the application and store the time to be the at the starting moment. If we are calling that method after 1 month, it would return us the results that were 1 week back from the time rails app started. But what we want is records that are 1 week old from now.
+    We are using lambda's property here that this is evaluated when called and not when it is defined unlike the other methods(like where). So, if we use lambda then it would solve our problems.
+
+    recent = Records.where(:created_at => 1.week.ago .. Time.now)
+      This would yield incorrect result since it gets evaluated at time of defining.
+
+    scope :recent , lambda {
+      where(:created_at => 1.week.ago .. Time.now)
+    }
+      This would yield correct result since it gets evaluated at time of calling.
+
+ASSOCIATIONS
+============
+- One-to-One Relation:
+  ClassRoom - Teacher
+    Classroom "has_one" teacher. (singular)
+    Teacher "belongs_to" a classroom. (singular)
+    Foreign Key on Teacher Table(classroom_id) and it should always be in the "belongs_to" side of the relationship.
+    To destroy an association, we can simply set it to 'nil' and continue but that won't delete the object from the database(classroom.teacher = nil). If we want to delete the association and delete the object from the database, then we would have to call the destroy method (classroom.teacher.destroy)
+
+- One-to-Many Relation:
+  Teacher - Courses
+    Teacher "has_many" courses. (plural)
+    Courses "belongs_to" a teacher. (singular)
+    Foreign Key on Courses Table(teacher_id) and it should always be in the "belongs_to" side of the relationship.
+    Methods:
+      teacher.courses
+      teacher.courses << course
+      teacher.courses = [maths, chem, phy]
+      teacher.courses.delete(maths) #remove the association but does NOT delete the record.
+      teacher.courses.destroy(maths) #remove the association and delete the record
+      teacher.courses.clear   #remove all the courses, can also write teacher.pages = []
+      teacher.courses.empty?
+      teacher.courses.size
+
+
+- Many-to-Many Relation:
+  Subject - Student
+    Subject "has_many" Students and "belongs_to" many students.
+    Students "has_many" Subjects and belongs to many Subjects.
+    We can't store the foreign key on any side of the table and so we will use a "Join-Table" to store the relationship between the subject_id and student_id. It would be a good idea to index both the foreign keys here. Note that the Join table won't have the an "id" field or the primary key field since it is a table that stores the primary keys of objects and that has to be unique, so turning off the id would be done by (:id => false).
+    We would have to generate a migration to generate this table. Join Table Naming Convention: first_table + _ + second_table
+
+- Many-to-many Rich Associations:
+  Lets say we also want to store more details on the relationship that Subjects and Students have. Lets say we want to store a column called seat_no, class_attended, time_of_enrollment or any such column in the table then we will have to add it in the subjects_students join table that we made. Since that name was made by rails convention, this association doesn't have to follow the rails convention. So, we name this table here lets say as course_enrollments. Now, instead of using has_and_belongs_to_many relation, we would have to break it down to has_many and belongs_to for both subjects and students. The course_enrollements table would be on the "belongs_to" side and the subjects and students table would be on the "has_many" side of the relationship.
+  The table name often ends with "--ments" or "--ships"
+  One very tricky scenario is when you try to add something and save it in the course_enrollments join table in the rails console, if you try adding it like:
+    ce = CourseEnrollment.new
+    maths = Subject.new
+    ce.seat_no = 1
+    maths.course_enrollments << ce # Would throw error because it can't save in the DB. WHY?? => Because the join table should have both the subject_id and student_id but here, we are only assigning the subject_id and not student_id. So, we should do it like this:
+    maths = Subject.new
+
+    me = Student.new
+    ce = CourseEnrollment.new (:seat_no => 1, :subject => maths, :student => me )
+    subject = Subject.new
+    ce.save #CORRECT and SAVED properly.
+
+    A Problem and a solution
+      Previously in a "non-rich" many-to-many association, we were able to do something like subject.students and it gave us the result( rails would solve the join-table mystery for us), but now if we try to do something like this then it would error out because now there's an active record model(course_enrollement) that sits between both the models. We can do it like this now:
+        subject.course_enrollment.map { |ce| ce.student }
+
+      But this looks cumbersome and far more complex than just subject.student
+
+      Solution: Rails gives us another powerful tool for this named "has_many :through" association. It it similar to it except that which we are defining our associations, we ALSO need to specify(we already have has_many :course_enrollements) it "has_many :students, :through => :course_enrollment ". So my "Subject" model would finally look like:
+        has_many :course_enrollements
+        has_many :students, :through => :course_enrollments
+
+      Now, we can successfully do subject.students.
+
+REST HTTP VERBS
+===============
+  GET : Retrieve items from resource. Used in links. Can handle multiple requests. Can be cached.
+  POST : Create new item in resource. Used in forms. Can not handle multiple requests. Can not be cached.
+  PATCH : Update existing item in resource. Used in forms. Can handle multiple requests. Can not be cached.
+  DELETE : Delete existing item in resource. Used in forms. Can handle multiple requests. Can not be cached.
+
+  Rails actually passes in only GET or POST to the browser. SO how does it handle the PATCH and DELETE request? => It sends a POST request with hidden field and its value is "patch", so basically for PATCH and DELETE requests it masks itself as if it were a POST request.
+
+CRUD
+====
+  Create: new, Display new record form. (/subjects/new) => GET
+  Create: create, Process new record form. (/subjects/create) => POST
+
+  Read: index, List records (/subjects) => GET
+  Read: show, Display a single record(/subjects/show/:id) => GET
+
+  Update: edit, Display edit record form(/subjects/edit/:id) => GET
+  Update: update, Process edit record form(/subjects/update/:id) => PATCH
+
+  Delete: delete, Display delete record form(/subjects/delete/:id) => GET
+  Update: destroy, Process delete record form(/subjects/destroy/:id) => DELETE
+
+ASSET PIPELINES
+===============
+- It concatenates css and JS files, compresses and minifies them. Precompiles them. Allows writing assets in other languages. Supports asset fingerprinting.
+- Located at app/assets/.. directory
+
+  * Stylesheets: At first we need to write stylesheets(app/assets/stylesheets, if not without asset pipeline, then use /public/stylesheets/..), then add them in the manifest files(require ... in application.css or make a new something.css file) and then add manifest to asset precompile list( config/initializers/assets.rb and uncomment the last line and edit with correct name). Then we need to include a stylesheet link tag in HTML (<link href="/assets/stylesheets/application.css" rel="stylesheet" type="text/css" media="all" /> but rails gives us a nice helper method for it which is something like this: <%= stylesheet_link_tag('application') %>).
+  SASS: Syntactically Awesome Stylesheets.
+
+  * Javascript: Similar to Stylesheet
+    We have javascript helpers if we want to use:
+      <%= javascript_tag("alert('Are you sure?');") %>
+      <%= javascript_tag do %>
+        alert('Are you sure?');
+      <% end %>
+
+  * Images: There's a rule of thumb which says put all your UI or app images in the assets/images/ directory but store all the user supplied images in the public directory or use some ruby gem(Paperclip or carrierwave) for it.
+    Instead of
+      <image src="assets/logo.png" />
+    We can use a rails helper which is :
+      <% image_tag('logo.png') %>
+      <% image_tag('logo.png', :size => '90x55', :alt => 'logo') %>
+
+Cookies
+=======
+  Web is a stateless environment and each request is treated as a new request. It doesn't know what the previous request was or what the future request would be(Notice how you login into amazon.in once and it keeps you logged in on each page request and also if you close the browser. How does it know that you are logged in when each request is a new set of request.). Cookies help us in solving this problem of stateless web Cookies allows us to preserve the "state". Web server sends data to the browser, which then saves it in a cookie. Browser sends cookie data with each future request to the web server.
+
+  Cookies in rails are just a hash of values named cookies.
+  cookies[:username] = 'hagupta'
+  cookies[:username] = {
+    :value => "hagupta",
+    :expires => 1.week.from_now
+  }
+  We can access that using <% cookies[:username] %>
+
+  Limitations:
+    Maximum size is 4K (~4000 characters)
+    Reside on the user's computer.
+    Can be deleted, read, or altered.
+
+  Advice:
+    Use cookies to preserve state and save time.
+    Store only small pieces of data.
+    Do not store model instances.
+    Do not store sensitive data.
+    Do not trust cookie data.
+
+  Example:
+    You can store users default sorting order, language preference.
+
+SESSIONS
+========
+  Sessions address the same problem which cookie does with the help of a cookie.
+
+  How it works?
+    Web server sends a session ID to the browser, which then saves it in a cookie.
+    Browser sends session ID with each future request to that web server.
+    Web server uses session ID to locate the session file. This session file would contain the data.
+
+  Session in Rails:
+    Session in rails are just a hash of values named session.
+    session[:username] = 'hagupta'
+    We can  access that using <% session[:username] %>
+
+  Advantages:
+    It is stored on the server side and so user can't read, alter or modify the data. So, this is more secure than a cookie.
+
+  Limitations:
+    It takes more time to retrieve the data because it is stored in server side and not on the user browser.
+    Session files accumulate over time. Can be stored in a computer or a database.
+    Session cookie resides on the user's computer which contains the session ID. this can be deleted or hijacked.
+
+  Session Storage:
+    There can be File Storage, Database Storage or Cookie Storage(Rails 3+). Rails uses cookie storage as its default. It uses "super cookies" in order to store the session information. It is fast; no lookup needed. No setup required as well. No file or database bloat since it is stored in the user's browser.
+    Session storage is configurable in files config/initializers/session_store.rb and config/secrets.yml
+
+    How is this different and more secure than normal cookies ?
+    "Super cookies" are encrypted to prevent reading and then cryptographically signed to prevent tampering(signing means generating an MD5 hash of it and then if the data is tampered, the MD5 hash would report that by changing its value). But remember that since it is a cookie, we have the 4K size limitations.
+
+LOGS
+====
+  log/ would have 3 files each for development, production and test.
