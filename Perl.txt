@@ -1,0 +1,564 @@
+2. Scalars
+----------
+
+  Perl has two scalar data-types: Numbers and strings.
+
+  Numbers:
+  --------
+    All Numbers have same format internally which is double precision floating point values, just different representations to outside users.
+    0123 -  Octal
+    0x11222eeff - Hex
+    0b111011010 - Binary
+
+  Strings:
+  ---------
+    Like numbers strings too have literal representations.
+    single quote: all escape characters do'nt work heres (\n,\t , etc) except \\ & \'
+    Double Quote: Same as regular strings.
+
+    Operators:
+    ----------
+      x: string multiplication operator.   "fred"x5 => "fredfredfredfredfred" left operand(string) is repeated right oprand(number) times.
+
+      . : simple concat operator
+
+    Automatic Conversion Between Numbers and Strings whenever possible by perl compiler and as needed. for e.g, "12"*3 gives output 36. "12fred34 "*3 will also output 36. trailing non-number or ws is discarded. if not possible, it will convert into 0.
+    We can enable warning to get the knowledge of this behaviour, if its going in our program.
+
+    Variables
+    ----------
+      Scalar variable starts with $, underscores are significant. C style operations are possible like,  +=
+    
+    print
+    -----
+      print "the answer is", 6*7,".\n"
+      In double quotes, variable name willl be replaced by its value. (variable interpolation).
+
+      $what = "brontosaurus steak";
+      $n = 3;
+      print "fred ate $n $whats.\n";  not the steaks, but the value of $whats
+      print "fred ate $n ${what}s.\n";  now uses $what
+      print "fred ate $n $what" . "s.\n";  another way to do it
+      print 'fred ate ' . $n . ' ' . $what . "s.\n";  an especially difficult way
+
+    create strings with characters that may not appear on your keyboard, such as é, å, α, or א 
+      $alef = chr( 0x05D0 );
+      $alpha = chr( hex('03B1') );
+      $omega = chr( 0x03C9 );
+
+    Boolean Values:
+    ---------------
+      Perl doesnt have a dedicated boolean type. It follow some rules to interpretate truth/ falsey values.
+
+      • If the value is a number, 0 means false; all other numbers mean true.
+      • Otherwise, if the value is a string, the empty string ('') means false; all other strings
+        mean true.
+      • Otherwise (that is, if the value is another kind of scalar than a number or a string),
+        convert it to a number or a string and try again.§
+
+      Note: '0' will evaluate to false.
+
+      To get negation of boolean value use !.
+      therefore to convert into boolean(0 or 1) use !! before variable.
+
+      $true_var = !! 'Fred' convert into 1
+
+    Getting user Input
+    -------------------
+    $line = <STDIN>;
+
+    chomp Operator: 
+    ---------------
+    Mutates a variable to to remove trailing whitespace. Can be used as chomp($text) or chomp($text = <STDIN>)
+    it is a function, that returns no of chars chomped.
+
+    What happens if you use a scalar variable before you give it a value? Nothing serious, and definitely nothing fatal. Variables have the special undef value before they are first assigned.It is automatically typecasted to what required, for example 0 when assigned to num and '' when used as string.
+
+    line input operator <STDIN> return undef if end of text found.
+
+    defined($variable) return true if the variable is not undef. because otherwise undef might be interpretated as '' or 0.
+    $madona = undef   can also assign undef to variable.
+
+3. Array & Lists
+----------------
+  A variable that contains a List.
+
+  List:
+  List is the data (analogus to tuples).
+
+  Array is dependent on List while List is indepent of array.
+
+  Array name can be same as variable name.(Perl declares both in separate namespace)
+
+  Index of the element while accessing array may be f.point. It would be truncated by Perl compiler.
+   
+  Out of range Indices of arrays will corrospond to undef.
+
+  $#<Array_name> gives the Length of array.
+
+  Negative indices allowed but upto the length of array. accessing beyond that returns undef.
+
+  Assignment to -ve index of array beyond its range is fatal error!
+
+  List:
+  Defined as tuples
+
+  (1, 2, 3) # list of three values 1, 2, and 3
+  (1, 2, 3,) # the same three values (the trailing comma is ignored)
+  ("fred", 4.5) # two values, "fred" and 4.5
+  ( ) # empty list - zero elements
+  (1..100) # list of 100 integers
+
+  .. => range operator. (only counts up by 1)
+
+  Qw Shortcut: 
+  ("fred", "barney", "betty", "wilma", "dino")
+  qw( fred barney betty wilma dino ) # same as above, but less typing
+
+  qw=  quoted words.
+
+  List assignment:
+  ($fred, $barney, $dino) = ("flintstone", "rubble", undef);
+  ($fred, $barney) = ($barney, $fred); # swap those values
+
+  Different ways of assigning arrays:
+
+
+
+  @rocks = qw/ bedrock slate lava /;
+  @tiny = ( ); # the empty list
+  @giant = 1..1e5; # a list with 100,000 elements
+  @stuff = (@giant, undef, @giant); # a list with 200,001 elements
+  $dino = "granite";
+  @quarry = (@rocks, "crushed rock", @tiny, $dino);
+
+  Push,Pop Ops supported.
+
+  Unshift, shift => similar to pus,pop but at the start of array
+
+  splice: remove/Insert elements in the middle.
+  splice($Array,start,no_of_items_tobe_removed,$ReplacementList)  
+  #Replacement List need not to be the same size to that of no of elements removed.
+
+  Foreach:
+
+  @rocks = qw/ bedrock slate lava /;
+  foreach $rock (@rocks) {
+    $rock = "\t$rock"; # put a tab in front of each element of @rocks
+    $rock .= "\n"; # put a newline on the end of each
+  }
+
+  The control variable is not a copy of the list element—it actually is the list element.
+  That is, if you modify the control variable inside the loop, you modify the element itself,
+
+  value of control variable after the loop ends is one that was before the loop started, and not the last value.
+
+  we an omit the control variable, in that case perl will use its default control variable $_.
+
+  foreach (1..10) { # Uses $_ by default
+  print "I can count to $_!\n";
+  }
+
+  reverse operator: (Immutable) . reverses a List.
+  sort (Immutable) 
+
+  @back = reverse sort @rocks;
+
+  each : iterate through and return index value pair for all elments.
+  @rocks = qw/ bedrock slate rubble granite /;
+  while( my( $index, $value ) = each @rocks ) {
+  say "$index: $value";
+  }
+
+
+  Context:
+
+  While parsing expressions, perl expects either a scalar or a List. what perl expects is called context of expression.
+
+  42 + something # The something must be a scalar
+  sort something # The something must be a list
+
+  the operands are converted according to the context 
+
+  forcing scalar context: print "I have ", scalar @rocks, " rocks!\n"; # Correct, gives a number
+
+4. Subroutines
+--------------
+  Defining SubRoutine:
+
+  sub <Name>{
+    
+  }  
+
+  Invoking:
+  &<Name>
+
+  Return Val:
+  Last unassigned value of an expression or explicitly defined return
+
+  Arguments:
+
+  Pass as: &<Name>(1,2,3);
+
+  Parameters are stored in a List of default private variable @_
+
+  Private variables:
+  Applicable to any block {}
+  my @<Name> = @_
+  my($x,$y);
+
+  use strict; //To enforce some standard programming rules. eg: operating on a variable befor declaration.
+  (Inherent to perl 5.012)
+
+  return operator: to return mid-way through program ignoring remaining code of the sub routine.
+
+  my @names = qw/ fred barney betty dino wilma pebbles bamm-bamm /;
+  my $result = &which_element_is("dino", @names);
+  sub which_element_is {
+    my($what, @array) = @_;
+    foreach (0..$array) {  indices of @array's elements
+      if ($what eq $array[$_]) {
+        return $_;  return early once found
+      }
+    }
+    –1;  element not found (return is optional here)
+  } 
+
+  & before the subroutine call can be ommitted if the function is defined before calling.
+  Also if the function has the same name as that of perl-subroutine, then call your version through & and built In version without &.
+
+  Persistent and Private variables:
+  Persistent variables same as static variables in other PLs.
+  use keyword state before declaring.
+
+  use 5.010;
+  sub marine {
+    state $n = 0;  private, persistent variable $n
+    $n += 1;
+    print "Hello, sailor number $n!\n";
+  }
+
+  Can also declare non scalars with with state but with restriction on arrays and hashes. You can’t
+  initialize them in list contexts as of Perl 5.10:
+  state @array = qw(a b c);  Error!
+
+
+5. IO
+-----
+  STDIN:
+
+  Read single line from STDIN:
+  chomp($Line = <STDIN>);
+
+  Read Multiple Lines from STDIN (Scalar Context)
+
+  while(defined($line = <STDIN>)){
+    # Do something with line
+  }
+
+  Shortcut- for PERL:
+
+  while(<STDIN>){
+    print I saw $_;
+  }
+  or
+  while(defined($_ = <STDIN>)){
+    # Do something with line
+  }
+  or
+  foreach( <STDIN>){  #read lines in list context
+    # Do something with line
+  }
+  foreach might seem similar to while except in while input is read once a line and foreach reads it whole at once, stores it into list and iterates over the list.
+  That difference will become apparent when the input is coming from your 400 MB web server logfile! It’s generally best to use code like the while loop’s shortcut, which will process input a line at a time, whenever possible.
+
+
+  Diamond operator <>: takes input from files passed as program arguments
+  eg: 
+  while (defined($line = <>)) {
+    chomp($line);
+    print "It was $line that I saw!\n";
+  }
+
+  when the program is invoked as 
+  $ ./my_program fred barney betty
+
+  inputs are read from these files. Inputs does'nt break in case of EOF. it appears as if the input is comming from a large merged file
+  <> works on ARGV array that is preset by perl interpreteter during program invocation.
+
+
+
+  STDOUT:
+
+  print @array #prints without any space between items of array
+  print "@array" #prints interpolated array. i.e adds space in between items of array.
+
+  brackets are oprional unless they change the meaning of sentence
+
+  eg:
+  print (2+3)*4 #prints 5 since print (2+3) executes first to print 5, then returns 1 which is multiplied with 4 and the output is discarded.
+  prints ((2+3)*4) # prints 20
+
+  formatted output:
+  use printf just as C except that you can ommit parenthesis.
+  use %g in formatted string to print a number. where perl compiler automatically choses b/w int,fp or exp.
+
+  The %f conversion (floating-point) rounds off its output as needed, and even lets you request a certain number of digits after the decimal point:
+  printf "%12f\n", 6 * 7 + 2/3; # looks like ```42.666667
+  printf "%12.3f\n", 6 * 7 + 2/3; # looks like ``````42.667
+  printf "%12.0f\n", 6 * 7 + 2/3; # looks like ``````````43
+
+  same applies to %d & %s to format certain number of digits or characters.
+  %x %o for hex or octal;
+
+  application of printf (print an array with newline between items):
+
+  my @items = qw( wilma dino pebbles );
+  my $format = "The items are:\n" . ("%s\n" x @items);
+  ## print "the format is >>$format<<\n"; # for debugging
+  printf $format, @items;
+
+  <A bit of Unix>
+  $ cat fred barney | sort | ./your_program | grep something | lpr
+
+  This line says that the cat command should print out all of the lines of file fred followed by all of the lines of file barney. Then that output should be the input of the sort command, which sorts those lines and passes them on to your_program. After it has done its processing, your_program sends the data on to grep, which discards certain lines in the data, sending the others on to the lpr command, which should print everything that it gets on a printer. Whew!
+
+  Redircting stderr stream:
+  $ netstat | ./your_program 2>/tmp/my_errors
+
+  </A bit of Unix>
+
+  Opening a filehandle:
+
+  open CONFIG, 'dino'; #open a file named dino (default is for read)
+  open CONFIG, '<dino'; #open a file named dino for read
+  open BEDROCK, '>fred'; #open a file named fred for writing (if not present create new, if present delete the previous one and open new)
+  open LOG, '>>logfile'; #open a file named logfile in append mode if present, else create a new one.
+
+
+  After perl 5.6 three argument open can be used.
+
+  open CONFIG, '<', 'dino';
+
+  Catching error:
+  ---------------
+  my $success = open LOG, '>>', 'logfile'; # capture the return value
+  if ( ! $success ) {
+  # The open failed
+  ...
+  }
+
+  closing
+  --------
+  close BEDROCK
+
+  Fatal Errors with die
+  ---------------------
+
+  use die to create custom fatal error.
+
+  if ( ! open LOG, '>>', 'logfile' ) {
+    die "Cannot create logfile: $!";
+  }
+
+
+6. Hashes
+---------
+
+
+
+
+
+  foreach my $person (qw< barney fred >) {
+    print "I've heard of $person $family_name{$person}.\n";
+  }
+
+  accessing outside the hash gives undef:
+  $granite = $family_name{'larry'}; # No larry here: undef
+
+  Initialization:
+  ---------------
+
+  %some_hash = ('foo', 35, 'bar', 12.4, 2.5, 'hello',
+  'wilma', 1.72e30, 'betty', "bye\n");
+
+  The value of the hash (in a list context) is a simple list of key-value pairs:
+
+  Reverse key-values of a hash:
+  my %inverse_hash = reverse %any_hash;
+
+  ofcourse the values of initial hash should be unique, otherwuse the last value wins.
+
+  other way of initialization:
+  ----------------------------
+  my %last_name = ( # a hash may be a lexical variable
+    'fred' => 'flintstone',
+    'dino' => undef,
+    'barney' => 'rubble',
+    'betty' => 'rubble',
+  );
+
+  We can remove the quotations from the keys as long as the meaning remains same.
+  eg:
+   fred=> 'xyz';
+   but not, + => 'xyz', in this case you must use '+'=>'xyz'
+
+   another place you can do it is : score{fred} instead of score{'fred'}
+
+   Hash to List:
+   -------------
+   %hash = @array (in key value pairs)
+
+   Hash functions:
+   ---------------
+
+    my %hash = ('a' => 1, 'b' => 2, 'c' => 3);
+    my @k = keys %hash;       # get list of keys of hash in chronologicl order.
+    my @v = values %hash;     # gets list of values of hash in chronological added order
+
+    Iterating over hash: 
+
+      while(($key,$value)=each %hash)  # when end is reached each %hash returns (undef,undef), therefore no of element assigned is 0. 
+      {
+        print "$key => $value\n";
+      }
+
+    Other way to get sorted hash:
+
+      foreach $key (sort keys %hash) {
+        $value = $hash{$key};
+        print "$key => $value\n";
+        # Or, we could have avoided the extra $value variable:
+        # print "$key => $hash{$key}\n";
+      }
+
+    checking if a key is present or not?
+
+    if($hash{$key}){
+      do something
+    }
+    will not work if the hash contains key but with value '',0 or undef.
+
+    use exists function instead.
+    if(exists $hash{$key}){
+      do something
+    }
+
+    delete $hash{$key} to remove the key from hash
+
+    Hashes can be interpolated  within strings as $hash{$key} but not entirely ("%books" is not supported).
+
+  Rules to note for Hash:
+  -----------------------
+  use () during initialization
+  eg, %hash = (1,2,3,4);
+
+  use {} for reference:
+  eg $a{$b}  
+
+
+7. Regex - Intro
+----------------
+
+  To match a pattern (regular expression) against the contents of $_, simply put the pattern
+  between a pair of forward slashes (/).
+
+    $_ = "yabba dabba doo";
+    if (/abba/) {
+      print "It matched!\n";
+    }
+
+  Match by Properties:
+
+  if (/\p{Space}/) { # 26 different possible characters
+    print "The string has some whitespace.\n";
+  }
+
+  3 Regex Quantifiers:
+   * + ?
+   group in patterns with () /fred+/ can match freddddd while /(fred)+/ can meatch fredfredfred
+
+   Back reference:
+
+   Match a part of pattern already written in the pattern. eg : yabba dabba , for such patterns to math we can write /y(....) d\1/ \1 is called back reference and referes to the first bracket.
+
+   What if nesting is there?
+   Just consider the order of opening paranthesis.
+
+   What if order is above 10 or the char just next to back ref is a number.
+   eg: /(.)\111/ which bracket reference will perl use /1 or /11 ?. TO resolve this ambiguity perl(>=5.10) introduced new notion \g{1}. with this notion we can even use -ve numbers. The -ve notion is relative back reference.
+
+
+  use 5.010
+
+  $_ = "xaa11bb";
+  if (/(.)(.)\g{–1}11/) {
+  print "It matched!\n";
+  }
+
+  Alternatives (logical or) 
+
+  /fred( +|\t+)barney/   
+
+  character class: 
+
+  [abcwxyz]  - May match any of these 7 charecters.
+  [a-cw-z]  - may match charecter from a to c and w to z.
+  [a-zA-Z] - Uppercase or Lowere case character
+  [\000-\177]- matches any 7 bit asci charecter
+
+  ^ = negate shortcuts e.g, [^\w]
+
+  /HAL-[\d]+/ : can also match unicode digits(from 5.6 , before it was same as [0-9]). might be problematic for old programmers. Therefore /a at the end will match it as an ascii string. 
+  eg: (/HAL-[\d]+/a) matches it as ascii string.
+
+  \s whitespace, \h horizontal whitespace, \v vertical whitespace.
+  \R - Any linebreak, independent of DOS ir Unix Line endings.
+
+  \w matches identifier equivalent to [a-zA-Z0-9_]
+
+8. Regex Matching
+-----------------
+  Matching with m//
+
+  other ways: m,fred,;m<>m{},m[],m(fred) but be ware whwn using inside your program. best one is {} since no need to escape if used inside. default /dds/.
+
+  Match Modifiers:
+
+  case insensitive match with /i : if (/yes/i)
+
+  Match any char with /s. By default . doesnt match \n, to make it match actually anything (including \n) use /s.  eg,/Hey.World!/s
+
+  Adding Whitespace with /x : add white space in the patter for better readibility. perl compiler will ignore it. e.g,
+    
+  /-?[0-9]+\.?[0-9]*/ # what is this doing?
+  / -? [0-9]+ \.? [0-9]* /x # a little better
+
+  /
+  -? # an optional minus sign
+  [0-9]+ # one or more digits before the decimal point
+  \.? # an optional decimal point
+  [0-9]* # some optional digits after the decimal point
+  /x   #Much better
+
+
+  Combining Option Modifiers
+    if (/barney.*fred/is)  # both /i and /s
+
+  Anchors: \A anchor matches at asolute beggining of the string, \z ,matches at absolute end of String. \Z applows optional newline character ed: /\A\s*\Z/
+
+  word anchor: matches at words.  /\bfred\b/ will match fred but not fredrick
+
+  Binding Operator: =~ match with custom string: e.g,
+
+  my $some_other = "I dream of betty rubble.";
+    if ($some_other =~ /\brub/) {
+      print "Aye, there's the rub.\n";
+    }
+
+
+  Non Capturing Paranthesis:
+
+
+  
+
